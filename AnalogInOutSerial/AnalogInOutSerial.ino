@@ -21,7 +21,7 @@
 */
 
 // These constants won't change. They're used to give names to the pins used:
-const int analogInPin = 13;  // Analog input pin that the potentiometer is attached to
+const int analogInPin = 1;  // Analog input pin that the potentiometer is attached to
 
 int sensorValue = 0;        // value read from the pot
 int outputValue = 0;
