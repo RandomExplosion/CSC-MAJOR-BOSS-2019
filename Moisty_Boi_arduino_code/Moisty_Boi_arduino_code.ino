@@ -24,6 +24,8 @@ void setup() {
   lcd.begin(16, 2);
 
   lcd.print("starting");
+
+  digitalWrite(solenoid, LOW);
 }
 
 void loop() {
@@ -34,7 +36,7 @@ void loop() {
 
   Serial.print("sensor1 = ");
   Serial.print(mSenseOut1);
-  Serial.print(" sensor2 = ");
+  Serial.print("\tsensor2 = ");
   Serial.println(mSenseOut2);
   
   senseAvg = (mSenseOut1 + mSenseOut2) / 2;
@@ -49,7 +51,6 @@ void loop() {
   lcd.print(round(thresh));
 
   int controlOut = analogRead(control);
-  
   if (controlOut > 90 && controlOut < 110 && thresh < 250)
   {
     thresh += 10;
