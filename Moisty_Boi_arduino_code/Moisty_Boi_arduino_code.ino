@@ -44,8 +44,8 @@ void loop() {
   lcd.setCursor(9, 0);
   lcd.print(round(senseAvg));
   lcd.setCursor(0, 1);
-  lcd.print("thresh hold:");
-  lcd.setCursor(12, 1);
+  lcd.print("threshold:");
+  lcd.setCursor(10, 1);
   lcd.print(round(thresh));
 
   int controlOut = analogRead(control);
