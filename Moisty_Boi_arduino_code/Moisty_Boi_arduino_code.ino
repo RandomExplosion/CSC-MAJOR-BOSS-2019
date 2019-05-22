@@ -26,13 +26,49 @@ void setup() {
   lcd.print("starting");
 
   digitalWrite(solenoid, LOW);
+
+  setThresh();
 }
+
+void setThresh()
+{
+  bool unset = true;
+  while (unset = true)
+  {
+    int controlOut = analogRead(control);
+    Serial.println(controlOut);
+    if (controlOut > 90 && controlOut < 110 && thresh < 250)
+    {
+      thresh += 10;
+      Serial.println(thresh);
+    }
+  
+    if (controlOut > 245 && controlOut < 265 && thresh > 10)
+    {
+      thresh -= 10;
+      Serial.println(thresh);
+    } 
+    if (controlOut > 630 && controlOut < 650)
+    {
+      unset = false;
+      break;
+    } 
+    lcd.print("threshold:");
+    lcd.setCursor(10, 0);
+    lcd.print(round(thresh));
+    delay(100);
+    lcd.clear();
+  }
+}
+
 
 void loop() {
   lcd.clear();
-  
-  mSenseOut1 = map(mSense1, 0, 1023, 0, 255);
-  mSenseOut2 = map(mSense2, 0, 1023, 0, 255);
+
+  int temp1 = analogRead(mSense1);
+  int temp2 = analogRead(mSense2);
+  mSenseOut1 = map(temp1, 0, 1023, 0, 255);
+  mSenseOut2 = map(temp2, 0, 1023, 0, 255);
 
   Serial.print("sensor1 = ");
   Serial.print(mSenseOut1);
