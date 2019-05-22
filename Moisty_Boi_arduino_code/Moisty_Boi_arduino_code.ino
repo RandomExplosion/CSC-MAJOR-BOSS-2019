@@ -1,19 +1,19 @@
 #include <LiquidCrystal.h>
 
+//declaring io pins
 const int mSense1 = A1;
 const int mSense2 = A2;
-
 const int control = A0;
-
 const int solenoid = 3;
 
+//declaring variables
 int mSenseOut1 = 0;
 int mSenseOut2 = 0;
-
-int thresh = 50;
-
+float bias = 1.0;
+int target = 50;
 float senseAvg = 0;
 
+//declaring lcd
 const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
@@ -21,41 +21,55 @@ void setup() {
 
   Serial.begin(9600);
 
+  //initialises lcd
   lcd.begin(16, 2);
 
-  lcd.print("starting");
-
+  //turns off solenoid
   digitalWrite(solenoid, LOW);
 
-  setThresh();
+  //runs set target routine
+  setTarget();
 }
 
-void setThresh()
+void setTarget()
 {
   bool unset = true;
   while (unset = true)
   {
+    
+    //IMPORTANT
+    //the lcd sheild detects what button is down
+    //by using an analog pin and a series of resistors
+    
+    
+    //reads control pin(buttons on lcd
     int controlOut = analogRead(control);
-    Serial.println(controlOut);
-    if (controlOut > 90 && controlOut < 110 && thresh < 250)
+
+    //if up button pressed
+    if (controlOut > 90 && controlOut < 110 && target < 250)
     {
-      thresh += 10;
-      Serial.println(thresh);
+      //sets target int higher
+      target += 10;
+      Serial.println(target);
     }
-  
-    if (controlOut > 245 && controlOut < 265 && thresh > 10)
+    //if down button pressed
+    if (controlOut > 245 && controlOut < 265 && target > 10)
     {
-      thresh -= 10;
-      Serial.println(thresh);
+      //sets target int lower
+      target -= 10;
+      Serial.println(target);
     } 
+    // if selcet button down
     if (controlOut > 630 && controlOut < 650)
     {
+      //stop this function then proceed with void loop()
       unset = false;
       break;
     } 
-    lcd.print("threshold:");
-    lcd.setCursor(10, 0);
-    lcd.print(round(thresh));
+    //outputs to lcd
+    lcd.print("target:");
+    lcd.setCursor(7, 0);
+    lcd.print(round(target));
     delay(100);
     lcd.clear();
   }
@@ -77,29 +91,32 @@ void loop() {
   
   senseAvg = (mSenseOut1 + mSenseOut2) / 2;
 
+  //outputs to lcd
   lcd.setCursor(0, 0);
   lcd.print("senseAvg:");
   lcd.setCursor(9, 0);
   lcd.print(round(senseAvg));
   lcd.setCursor(0, 1);
-  lcd.print("threshold:");
-  lcd.setCursor(10, 1);
-  lcd.print(round(thresh));
+  lcd.print("target:");
+  lcd.setCursor(7, 1);
+  lcd.print(round(target));
 
+  //changing target soil moisture while running if needed
   int controlOut = analogRead(control);
-  if (controlOut > 90 && controlOut < 110 && thresh < 250)
+  if (controlOut > 90 && controlOut < 110 && target < 250)
   {
-    thresh += 10;
-    Serial.println(thresh);
+    target += 10;
+    Serial.println(target);
   }
 
-  if (controlOut > 245 && controlOut < 265 && thresh > 10)
+  if (controlOut > 245 && controlOut < 265 && target > 10)
   {
-    thresh -= 10;
-    Serial.println(thresh);
+    target -= 10;
+    Serial.println(target);
   }
 
-  if (senseAvg < thresh && senseAvg < 255)
+  //if both sensors average is below the target moisture then run water routine
+  if (senseAvg < target * bias && senseAvg < 255)
   {
     water();
   }
@@ -109,10 +126,13 @@ void loop() {
 
 void water()
 {
+  //opens solenoid
   digitalWrite(solenoid, HIGH);
   Serial.println("solenoid is ON");
   delay(500);
+  //closes solenoid
   digitalWrite(solenoid, LOW);
   Serial.println("solenoid is OFF");
+  //waits for water to spread before resuming checking
   delay(1000);
 }
