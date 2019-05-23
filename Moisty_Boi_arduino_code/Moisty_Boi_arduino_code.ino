@@ -1,6 +1,7 @@
 #include <dht.h>
 #include <LiquidCrystal.h>
 
+
 dht DHT;
 
 //declaring io pins
@@ -13,12 +14,14 @@ const int tSense = 7;
 
 
 //declaring variables
-int mSenseOut1 = 0;
-int mSenseOut2 = 0;
+int mSenseOut1;
+int mSenseOut2;
 float bias = 1.0;
 int target = 50;
-float senseAvg = 0;
-
+float senseAvg;
+float temp;
+float humidity;
+float target2;
 
 //declaring lcd
 const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
@@ -87,17 +90,24 @@ void loop() {
   lcd.clear();
 
   int chk = DHT.read11(DHT11_PIN);
+  temp = DHT.temperature;
+  humidity = DHT.temperature;
   Serial.print("Temperature:");
-  Serial.print(DHT.temperature);
+  Serial.print(temp);
   Serial.print("\tHumidity:");
-  Serial.println(DHT.humidity);
+  Serial.println(humidity);
+  
+  temp = map(round(temp), 0, 50, 1400, 600);
+  humidity = map(round(humidity), 0, 100, 1400, 600);
+  temp = temp / 1000;
+  humidity = humidity / 1000;
 
-  Serial.println(map(DHT.humidity, 20, 90, 1.4, 0.6));
-  Serial.println(map(DHT.temperature, 0, 50, 1.4, 0.6));
-
-  bias = map(DHT.temperature, 0, 50, 1.4, 0.6) + map(DHT.humidity, 20, 90, 1.4, 0.6) / 2;
-
-  Serial.println(bias);
+  bias = (humidity + temp) / 2;
+  
+  Serial.print("temp:");
+  Serial.print(temp);
+  Serial.print("\thumidity:");
+  Serial.println(humidity);
   
   
   int temp1 = analogRead(mSense1);
@@ -109,12 +119,15 @@ void loop() {
   Serial.print(mSenseOut1);
   Serial.print("\tsensor2:");
   Serial.println(mSenseOut2);
-  Serial.print("humidity:");
   
   
   
   senseAvg = (mSenseOut1 + mSenseOut2) / 2;
 
+  target2 = target * bias;
+
+  Serial.println(bias);
+  
   //outputs to lcd
   lcd.setCursor(0, 0);
   lcd.print("senseAvg:");
@@ -123,11 +136,11 @@ void loop() {
   lcd.setCursor(0, 1);
   lcd.print("target:");
   lcd.setCursor(7, 1);
-  lcd.print(round(target));
+  lcd.print(round(target2));
 
   //changing target soil moisture while running if needed
   int controlOut = analogRead(control);
-  if (controlOut > 90 && controlOut < 110 && target < 250)
+  if (controlOut > 90 && controlOut < 110 && target < 150)
   {
     target += 10;
     Serial.println(target);
@@ -140,7 +153,7 @@ void loop() {
   }
 
   //if both sensors average is below the target moisture then run water routine
-  if (senseAvg < target * bias && senseAvg < 255)
+  if (senseAvg < target2 && senseAvg < 255)
   {
     water();
   }
