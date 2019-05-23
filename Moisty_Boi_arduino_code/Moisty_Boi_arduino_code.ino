@@ -93,7 +93,7 @@ void loop() {
   humidity = DHT.temperature;
 
   //setting and finding the bias
-  temp = map(round(temp), 0, 50, 1400, 600);
+  temp = map(round(temp), 0, 50, 600, 1400);
   humidity = map(round(humidity), 0, 100, 1400, 600);
   temp = temp / 1000;
   humidity = humidity / 1000;
