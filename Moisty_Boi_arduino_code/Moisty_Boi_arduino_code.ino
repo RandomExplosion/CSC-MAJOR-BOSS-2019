@@ -1,8 +1,6 @@
+
 #include <dht.h>
 #include <LiquidCrystal.h>
-
-
-dht DHT;
 
 //declaring io pins
 const int mSense1 = A1;
@@ -11,7 +9,6 @@ const int control = A0;
 const int solenoid = 3;
 const int tSense = 7;
 #define DHT11_PIN 13
-
 
 //declaring variables
 int mSenseOut1;
@@ -24,8 +21,10 @@ float humidity;
 float target2;
 
 //declaring lcd
-const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+
+//declaring HT sensor
+dht DHT;
 
 void setup() {
 
@@ -88,44 +87,28 @@ void setTarget()
 
 void loop() {
   lcd.clear();
-
+  
+  //finding temperature and humidity
   int chk = DHT.read11(DHT11_PIN);
   temp = DHT.temperature;
   humidity = DHT.temperature;
-  Serial.print("Temperature:");
-  Serial.print(temp);
-  Serial.print("\tHumidity:");
-  Serial.println(humidity);
-  
+
+  //setting and finding the bias
   temp = map(round(temp), 0, 50, 1400, 600);
   humidity = map(round(humidity), 0, 100, 1400, 600);
   temp = temp / 1000;
   humidity = humidity / 1000;
+  bias = (humidity + temp) / 2; 
 
-  bias = (humidity + temp) / 2;
-  
-  Serial.print("temp:");
-  Serial.print(temp);
-  Serial.print("\thumidity:");
-  Serial.println(humidity);
-  
-  
+  //setting sensor output
   int temp1 = analogRead(mSense1);
   int temp2 = analogRead(mSense2);
   mSenseOut1 = map(temp1, 0, 1023, 0, 255);
-  mSenseOut2 = map(temp2, 0, 1023, 0, 255);
-
-  Serial.print("sensor1:");
-  Serial.print(mSenseOut1);
-  Serial.print("\tsensor2:");
-  Serial.println(mSenseOut2);
-  
-  
-  
+  mSenseOut2 = map(temp2, 0, 1023, 0, 255); 
   senseAvg = (mSenseOut1 + mSenseOut2) / 2;
 
+  //setting target with bias
   target2 = target * bias;
-
   Serial.println(bias);
   
   //outputs to lcd
@@ -171,5 +154,5 @@ void water()
   digitalWrite(solenoid, LOW);
   Serial.println("solenoid is OFF");
   //waits for water to spread before resuming checking
-  delay(1000);
+  delay(2000);
 }
