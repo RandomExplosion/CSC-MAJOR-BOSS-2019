@@ -7,7 +7,6 @@ const int mSense1 = A1;
 const int mSense2 = A2;
 const int control = A0;
 const int solenoid = 3;
-const int tSense = 7;
 #define DHT11_PIN 13
 
 //declaring variables
