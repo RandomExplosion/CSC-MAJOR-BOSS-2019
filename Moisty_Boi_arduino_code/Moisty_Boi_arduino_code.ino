@@ -139,8 +139,14 @@ void loop() {
   {
     water();
   }
-
-  delay(1);
+  if (senseAvg > target2)
+  {
+    delay(1000);
+  }
+  else{
+    delay(1);
+  }
+  
 }
 
 void water()
